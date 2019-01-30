@@ -19,7 +19,7 @@ public class RateableItemServiceControllerAdvice {
     @ExceptionHandler(RateableItemNotFoundException.class)
     public final ResponseEntity<ErrorDetails> handleRateableItemNotFoundException(RateableItemNotFoundException ex) {
 
-        ErrorDetails errorDetails = new ErrorDetails(new Date(), ex.getMessage(), "RateableItem not found with this ID");
+        ErrorDetails errorDetails = new ErrorDetails(new Date(), ex.getMessage(), "Rateable Item not found with this ID");
 
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
     }

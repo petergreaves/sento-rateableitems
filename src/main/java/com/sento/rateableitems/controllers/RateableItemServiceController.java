@@ -77,11 +77,11 @@ public class RateableItemServiceController {
     @Transactional
     public ResponseEntity<?> deleteRateableItemById(@PathVariable("rateableItemId") String rateableItemId) {
 
-        Optional<RateableItem> org=rateableItemService.deleteRateableItem(rateableItemId);
+        Optional<RateableItem> rateableItem=rateableItemService.deleteRateableItem(rateableItemId);
 
         RateableItem deleted = null;
-        if (org.isPresent()) {
-            deleted = org.get();
+        if (rateableItem.isPresent()) {
+            deleted = rateableItem.get();
             logger.debug("RateableItem found to delete for id = " + rateableItemId);
             return new ResponseEntity<RateableItem> (deleted, HttpStatus.NO_CONTENT);
 
@@ -173,5 +173,6 @@ public class RateableItemServiceController {
         return responseHeaders;
 
     }
+
 
 }

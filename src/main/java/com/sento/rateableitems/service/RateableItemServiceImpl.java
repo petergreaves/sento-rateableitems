@@ -2,6 +2,7 @@ package com.sento.rateableitems.service;
 
 import com.sento.rateableitems.exceptions.InvalidRateableItemException;
 import com.sento.rateableitems.exceptions.RateableItemAlreadyExistsException;
+import com.sento.rateableitems.exceptions.RateableItemNotFoundException;
 import com.sento.rateableitems.model.Organisation;
 import com.sento.rateableitems.model.RateableItem;
 import com.sento.rateableitems.repository.RateableItemsRepository;
@@ -82,7 +83,17 @@ public class RateableItemServiceImpl implements RateableItemService {
 
     @Override
     public Optional<RateableItem> deleteRateableItem(String rateableItemId) {
-        return Optional.empty();
+        Optional<RateableItem> opt = rateableItemsRepository.findByRateableItemId(rateableItemId);
+
+        if (opt.isPresent()) {
+            rateableItemsRepository.deleteByRateableItemId(rateableItemId);
+        }
+        else {
+
+            throw new RateableItemNotFoundException("rateableItemId=" + rateableItemId);
+
+        }
+        return opt;
     }
 
 
