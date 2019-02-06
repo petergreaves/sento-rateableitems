@@ -17,7 +17,7 @@ import java.util.Date;
 
 import static org.junit.Assert.*;
 
-public class RateableItemsRestControllerCreateTest extends AbstractOrgTestBase {
+public class RateableItemsRestControllerCreateTest extends AbstractRateableItemTestBase {
 
 	@Autowired
 	private JdbcTemplate template;
@@ -91,9 +91,8 @@ public class RateableItemsRestControllerCreateTest extends AbstractOrgTestBase {
 	@Test
 	public void createRateableItemFromJson() throws Exception {
 
+String inputJson = "{\"rateableItemId\":\"RI0390\",\"owningOrgId\":\"BM022\",\"description\":\"The page for this great product!\",\"startDate\":1549206340213,\"endDate\":1580742340213,\"active\":false}";
 
-
-		String inputJson = super.mapToJson(review);
 
 		MvcResult mvcResult = mvc.perform(
 				MockMvcRequestBuilders.post(uriPostGetAll).contentType(MediaType.APPLICATION_JSON_VALUE).content(inputJson))
@@ -164,6 +163,46 @@ public class RateableItemsRestControllerCreateTest extends AbstractOrgTestBase {
 
         assertTrue(405 == status & expected.getDetail().equals(error.getDetail())
                 & expected.getMessage().equals(error.getMessage()));
+
+	}
+
+	@Test
+	public void acceptValidISO8601Dates() throws Exception{
+
+    	String sd = "\"2019-02-03T09:00:00Z\"";
+    	String ed = "\"2020-02-02T08:59:59Z\"";
+
+		String inputJson = "{\"rateableItemId\":\"RI0390\",\"owningOrgId\":\"BM022\",\"description\":\"The page for this great product!\",\"startDate\":" + sd + ",\"endDate\":"+ ed +",\"active\":false}";
+
+		// fix the startDate to ISO8601
+
+		MvcResult mvcResult = mvc.perform(
+				MockMvcRequestBuilders.post(uriPostGetAll).contentType(MediaType.APPLICATION_JSON_VALUE).content(inputJson))
+				.andReturn();
+
+		int status = mvcResult.getResponse().getStatus();
+		String location = mvcResult.getResponse().getHeader("Location");
+		assertTrue(201 == status && "http://services.sento.com:7070/v1/rateableitems/RI0390".equals(location));
+
+
+	}
+	@Test
+	public void failOnImpossibleISO8601StartDate() throws Exception{
+
+    	//an invalid date
+		String sd = "\"2019-92-03T09:00:00Z\"";
+
+		String inputJson = "{\"rateableItemId\":\"RI0390\",\"owningOrgId\":\"BM022\",\"description\":\"The page for this great product!\",\"startDate\":" + sd + ",\"active\":false}";
+
+		MvcResult mvcResult = mvc.perform(
+				MockMvcRequestBuilders.post(uriPostGetAll).contentType(MediaType.APPLICATION_JSON_VALUE).content(inputJson))
+				.andReturn();
+
+		ErrorDetails error = super.mapFromJson(mvcResult.getResponse().getContentAsString(), ErrorDetails.class);
+
+		int status = mvcResult.getResponse().getStatus();
+
+		assertTrue(status==404);
 
 	}
 

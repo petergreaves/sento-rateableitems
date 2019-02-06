@@ -2,6 +2,7 @@ package com.sento.rateableitems.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sento.rateableitems.util.IsActiveAttributeConverter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 import java.util.Objects;
@@ -57,6 +58,7 @@ public class RateableItem {
 
     @Column(name = "start_date")
     @Temporal(TemporalType.TIMESTAMP)
+   // @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date startDate;
 
 

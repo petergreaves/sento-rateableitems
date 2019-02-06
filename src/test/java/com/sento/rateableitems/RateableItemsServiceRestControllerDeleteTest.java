@@ -14,7 +14,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class RateableItemsServiceRestControllerDeleteTest extends AbstractOrgTestBase {
+public class RateableItemsServiceRestControllerDeleteTest extends AbstractRateableItemTestBase {
 	
 	
 	@Autowired

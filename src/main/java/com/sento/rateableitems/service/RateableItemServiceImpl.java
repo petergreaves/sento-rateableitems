@@ -8,11 +8,10 @@ import com.sento.rateableitems.model.RateableItem;
 import com.sento.rateableitems.repository.RateableItemsRepository;
 import com.sento.rateableitems.util.OrganisationServiceRestTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.loadbalancer.LoadBalanced;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
+import java.util.Date;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service("rateableItemService")
@@ -43,6 +42,13 @@ public class RateableItemServiceImpl implements RateableItemService {
 
     @Override
     public RateableItem saveRateableItem(RateableItem rateableItem) throws RateableItemAlreadyExistsException, InvalidRateableItemException {
+
+        // let's just check the dates
+
+        if (!datesAreValid(rateableItem.getStartDate(), rateableItem.getEndDate())){
+
+            throw new InvalidRateableItemException("Start date must be before end date.");
+        }
 
         boolean okToCreate = true;
         RateableItem createdRateableItem = null;
@@ -77,8 +83,40 @@ public class RateableItemServiceImpl implements RateableItemService {
     }
 
     @Override
-    public RateableItem updateRateableItem(RateableItem rateableitem) {
-        return null;
+    public RateableItem updateRateableItem(RateableItem rateableItem) {
+
+        // let's just check the dates
+
+        if (!datesAreValid(rateableItem.getStartDate(), rateableItem.getEndDate())){
+
+            throw new InvalidRateableItemException("Start date must be before end date.");
+        }
+
+
+        // what org id is being updated?
+        String id = rateableItem.getRateableItemId();
+
+        RateableItem riToBeUpdated;
+        RateableItem updatedRI;
+
+        Optional<RateableItem> testForRI = rateableItemsRepository.findByRateableItemId(id);
+
+        // if it exists, update the ID to match the existing internal ID
+        // and then save it. otherwise no such element
+
+        try {
+            riToBeUpdated = testForRI.get();
+            rateableItem.setId(riToBeUpdated.getId());
+            updatedRI=rateableItemsRepository.save(rateableItem);
+
+        } catch (NoSuchElementException nse) // no existing org, so an error on an update
+        {
+            throw new RateableItemNotFoundException("Rateable item doesn't exist to update.");
+
+        }
+
+        return updatedRI;
+
     }
 
     @Override
@@ -110,5 +148,29 @@ public class RateableItemServiceImpl implements RateableItemService {
         }
 
         return org;
+    }
+
+    private boolean datesAreValid(Date startDate, Date endDate){
+
+        //if there is no end date, we are ok with that
+
+        boolean result = true;
+
+        if (null==endDate && null!=startDate){
+
+            return result;
+        }
+
+        // of the end date is before the start date, that is an error
+
+        if (startDate.compareTo(endDate) >0){
+
+           result = false;
+
+        }
+
+            return result;
+
+
     }
 }

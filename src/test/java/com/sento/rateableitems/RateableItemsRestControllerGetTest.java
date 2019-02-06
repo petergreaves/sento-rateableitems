@@ -1,5 +1,7 @@
 package com.sento.rateableitems;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sento.rateableitems.exceptions.ErrorDetails;
 import com.sento.rateableitems.model.RateableItem;
 import org.junit.After;
@@ -12,6 +14,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -20,7 +26,7 @@ import java.util.stream.Stream;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class RateableItemsRestControllerGetTest extends AbstractOrgTestBase {
+public class RateableItemsRestControllerGetTest extends AbstractRateableItemTestBase {
 
 	@Autowired
 	private JdbcTemplate template;
@@ -100,7 +106,7 @@ public class RateableItemsRestControllerGetTest extends AbstractOrgTestBase {
 
 		assertTrue(status==200 & (rateableItems.length == 3));
 	}
-	//@Test
+	@Test
 	public void getAllRateableItems() throws Exception { // only returns active by default
 
 		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uriGetBase).accept(MediaType.APPLICATION_JSON_VALUE))
@@ -159,6 +165,38 @@ public class RateableItemsRestControllerGetTest extends AbstractOrgTestBase {
 				& expected.getMessage().equals(error.getMessage()));
 	}
 
+	@Test
+	public void ensureDatetimesAreISO8601() throws Exception{
+
+		String target=uriGetBase+"/"+rateableItemToGet;
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(target).accept(MediaType.APPLICATION_JSON_VALUE))
+				.andReturn();
+
+		int status = mvcResult.getResponse().getStatus();
+		String content = mvcResult.getResponse().getContentAsString();
+
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode jsonNode = mapper.readTree(content);
+		JsonNode startDateNode = jsonNode.get("startDate");
+		String startDateAsText = startDateNode.asText();
+		JsonNode endDateNode = jsonNode.get("endDate");
+		String endDateAsText = endDateNode.asText();
+
+		boolean isValid = true;
+		LocalDate dt;
+		try {
+			dt = LocalDate.parse(startDateAsText, DateTimeFormatter.ISO_DATE_TIME);
+			dt=LocalDate.parse(endDateAsText, DateTimeFormatter.ISO_DATE_TIME);
+		}
+		catch(DateTimeParseException dtpe){
+
+			isValid=false;
+
+		}
+
+		assertTrue(isValid);
+
+	}
 
 
 }

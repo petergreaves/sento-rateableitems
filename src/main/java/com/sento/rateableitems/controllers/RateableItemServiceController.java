@@ -123,24 +123,24 @@ public class RateableItemServiceController {
     @RequestMapping(value="/v1/rateableitems/{rateableItemId}",method = RequestMethod.PUT)
     public ResponseEntity<?> updateRateableItem(@PathVariable("rateableItemId") String rateableItemId, @Valid @RequestBody RateableItem newRateableItem) {
 
-        logger.info("Update for organisation in PUT for id "+ newRateableItem.getRateableItemId());
-        RateableItem updatedOrg;
+        RateableItem rateableItem;
+        logger.info("Update for rateable item in PUT for id "+ newRateableItem.getRateableItemId());
 
-        final String updatedOrgIdFromBody = (newRateableItem.getRateableItemId()!=null?newRateableItem.getRateableItemId():"null ID");
+        final String updatedRateableIdFromBody = (newRateableItem.getRateableItemId()!=null?newRateableItem.getRateableItemId():"null ID");
 
-        if (! updatedOrgIdFromBody.equalsIgnoreCase(rateableItemId)) {
-            logger.error("Update failed - path/body org id mismatch for "+ rateableItemId);
-            ErrorDetails errorDetails = new ErrorDetails(new Date(), rateableItemId, "Update failed - path/body org id mismatch");
+        if (! updatedRateableIdFromBody.equalsIgnoreCase(rateableItemId)) {
+            logger.error("Update failed - path/body rateable item id mismatch for "+ rateableItemId);
+            ErrorDetails errorDetails = new ErrorDetails(new Date(), rateableItemId, "Update failed - path/body rateable id mismatch");
 
             return new ResponseEntity<ErrorDetails>(errorDetails, HttpStatus.METHOD_NOT_ALLOWED);
         }
 
         try{
-            updatedOrg=rateableItemService.updateRateableItem(newRateableItem);
+            rateableItem=rateableItemService.updateRateableItem(newRateableItem);
         }
         catch(RateableItemNotFoundException ex) {
-            logger.error("Attempted to update non-existent  org : " +rateableItemId);
-            ErrorDetails errorDetails = new ErrorDetails(new Date(), "orgId="+rateableItemId, "An RateableItem already exists with this ID");
+            logger.error("Attempted to update non-existent rateable item : " +rateableItemId);
+            ErrorDetails errorDetails = new ErrorDetails(new Date(), "rateableItemId="+rateableItemId, "No such Rateable item found with this ID");
 
             return new ResponseEntity<ErrorDetails>(errorDetails, HttpStatus.NOT_FOUND);
 
@@ -154,7 +154,7 @@ public class RateableItemServiceController {
         }
 
 
-        return new ResponseEntity<RateableItem>(updatedOrg, createLocationHeader(updatedOrg.getRateableItemId()), HttpStatus.NO_CONTENT);
+        return new ResponseEntity<RateableItem>(rateableItem, createLocationHeader(rateableItem.getRateableItemId()), HttpStatus.NO_CONTENT);
 
 
     }

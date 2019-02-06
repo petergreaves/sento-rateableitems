@@ -33,6 +33,7 @@ public class RateableItemServiceControllerAdvice {
 
     }
 
+
     @ExceptionHandler(RateableItemAlreadyExistsException.class)
     public ResponseEntity<ErrorDetails> handleOrganisationAlreadyExistsException(RateableItemAlreadyExistsException ex) {
 
