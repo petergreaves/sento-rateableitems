@@ -1,4 +1,4 @@
-build/lib/*
+build/libs/*.
 build/classes/*
 
 # Created by https://www.gitignore.io/api/intellij
